@@ -1,0 +1,84 @@
+from flask import Flask, jsonify, request
+import psycopg2
+
+app = Flask(__name__)
+
+# Database connection
+def get_db_connection():
+    conn = psycopg2.connect(
+        host="localhost",      # Change to your PostgreSQL host
+        database="mydatabase", # Change to your database
+        user="myuser",         # Change to your database user
+        password="mypassword"  # Change to your database password
+    )
+    return conn
+
+# Sample route to get data from PostgreSQL
+@app.route('/data', methods=['GET'])
+def get_data():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT id, name FROM mytable')  # Change to your table
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    # Convert the fetched data to a dictionary for JSON response
+    data = [{"id": row[0], "name": row[1]} for row in rows]
+    
+    return jsonify(data)
+
+# Route to insert data into the database
+@app.route('/add', methods=['POST'])
+def add_data():
+    data = request.json
+    name = data['name']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('INSERT INTO mytable (name) VALUES (%s)', (name,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({'message': 'Data added successfully!'})
+
+@app.route('/remove', methods=['DELETE'])
+def remove_data():
+    data = request.json
+    name = data['name']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('INSERT INTO mytable (name) VALUES (%s)', (name,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({'message': 'Data added successfully!'})
+
+@app.route('/update', methods=['PUT'])
+def update_data():
+    data = request.json
+    name = data['name']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute('INSERT INTO mytable (name) VALUES (%s)', (name,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({'message': 'Data added successfully!'})
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
